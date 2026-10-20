@@ -8,6 +8,7 @@ export const AppContextProvider = (props)=>{
     const navigate=useNavigate()
     const [allCourses,setAllCourses]=useState([])
     const [isEducator,setIsEducator]=useState(true)
+    const [enrolledCourses,setEnrolledCourses]=useState([])
     //Fetch all courses
     const fetchAllCourses=async()=>{
         setAllCourses(dummyCourses)
@@ -38,7 +39,7 @@ export const AppContextProvider = (props)=>{
         return humanizeDuration(time*60*1000,{units:["h","m"]})
     }
     //Function to calculate no of lectures in the course
-    const calculateNoOflectures=(course)=>{
+    const calculateNoOfLectures=(course)=>{
         let totalLectures=0;
         course.courseContent.forEach(chapter=>{
             if(Array.isArray(chapter.chapterContent)){
@@ -47,11 +48,16 @@ export const AppContextProvider = (props)=>{
         });
         return totalLectures;
     }
+    //Fetch user enrolled courses
+    const fetchUserEnrolledCourses=async()=>{
+        setEnrolledCourses(dummyCourses)
+    }
     useEffect(()=>{
         fetchAllCourses()
+        fetchUserEnrolledCourses()
     },[])
     const value={
-        currency,allCourses,navigate,calculateRating,isEducator,setIsEducator,calculateNoOflectures,calculateCourseDuration,calculateChapterTime
+        currency,allCourses,navigate,calculateRating,isEducator,setIsEducator,calculateNoOfLectures,calculateCourseDuration,calculateChapterTime,enrolledCourses,fetchUserEnrolledCourses
     }
     return (
         <AppContext.Provider value={value}>
