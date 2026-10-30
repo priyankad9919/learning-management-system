@@ -1,6 +1,8 @@
 import { clerkClient } from '@clerk/express';
 import Course from '../models/Course.js';
 import { v2 as cloudinary } from 'cloudinary';
+import User from '../models/User.js';
+import { Purchase } from '../models/Purchase.js';
 
 // update role to educator
 export const updateRoleToEducator = async (req, res) => {
@@ -74,7 +76,7 @@ export const getEducatorCourses=async(req,res)=>{
 }
 
 //get educator dashboard data (total earning,enrolled students,no. of courses)
-export const educatorDashboardData=async()=>{
+export const educatorDashboardData=async(req,res)=>{
     try{
         const educator=req.auth().userId;
         const courses=await Course.find({educator});
