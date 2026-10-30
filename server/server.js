@@ -1,16 +1,19 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
+console.log("Clerk Secret Key Loaded:", process.env.CLERK_SECRET_KEY ? "YES" : "NO");
 import connectDB from './configs/mongodb.js'
 import { clerkWebhooks } from './controllers/webhooks.js'
 import educatorRouter from './routes/educatorRoutes.js'
 import { clerkMiddleware } from '@clerk/express'
+import connectCloudinary from './configs/cloudinary.js';
 
 //Initialize express
 const app=express()
 
 //Connect to database
 await connectDB()
+await connectCloudinary()
 
 //Middlewares
 app.use(cors())
