@@ -34,7 +34,7 @@ export const userEnrolledCourses=async(req,res)=>{
 export const purchaseCourse=async(req,res)=>{
     try{
         const {courseId}=req.body
-        const {origin}=req.headers.origin||'https://localhost:5173'
+        const origin=req.headers.origin||'http://localhost:5173';
         const userId=req.auth().userId
         const userData=await User.findById(userId)
         const courseData=await Course.findById(courseId)
