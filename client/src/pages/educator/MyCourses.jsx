@@ -1,17 +1,39 @@
-import React,{useContext,useState,useEffect} from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { AppContext } from '../../context/AppContext'
 import Loading from '../../components/student/Loading'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const MyCourses = () => {
-  const {currency,allCourses}=useContext(AppContext)
-  const [courses,setCourses]=useState(null)
-  const fetchEducatorCourses=async()=>{
-    setCourses(allCourses)
+  // FIX: Extract backendUrl and getToken to make the secure API call
+  const { currency, backendUrl, isEducator,getToken } = useContext(AppContext)
+  const [courses, setCourses] = useState(null)
+
+  const fetchEducatorCourses = async () => {
+    try {
+      const token = await getToken()
+      // FIX: Fetch from the dedicated educator route instead of using public allCourses
+      const { data } = await axios.get(backendUrl + '/api/educator/courses', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      
+      if (data.success) {
+        setCourses(data.courses)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
-  useEffect(()=>{
-    fetchEducatorCourses()
-  },[])
-  return courses?(
+
+  useEffect(() => {
+    if(isEducator){
+      fetchEducatorCourses()
+    }
+  }, [isEducator])
+
+  return courses ? (
     <div className='h-screen flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0'>
       <div className='w-full'>
         <h2 className='pb-4 text-lg font-medium'>My Courses</h2>
@@ -26,14 +48,17 @@ const MyCourses = () => {
               </tr>
             </thead>
             <tbody className='text-sm text-gray-500'>
-              {courses.map((course)=>(
+              {courses.map((course) => (
                 <tr key={course._id} className='border-b border-gray-500/20'>
                   <td className='md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate'>
-                    <img src={course.courseThumbnail} alt="course image" className='w-16'/>
+                    <img src={course.courseThumbnail} alt="course image" className='w-16' />
                     <span className='truncate hidden md:block'>{course.courseTitle}</span>
                   </td>
-                  <td className='px-4 py-3'>{currency} {Math.floor(course.enrolledStudents.length*(course.coursePrice-course.discount*course.coursePrice/100))}</td>
-                  <td className='px-4 py-3'>{course.enrolledStudents.length}</td>
+                  {/* FIX: Added optional chaining (?.) and fallback (|| 0) to prevent crashes if array is empty/missing on new courses */}
+                  <td className='px-4 py-3'>
+                    {currency} {Math.floor((course.enrolledStudents?.length || 0) * (course.coursePrice - course.discount * course.coursePrice / 100))}
+                  </td>
+                  <td className='px-4 py-3'>{course.enrolledStudents?.length || 0}</td>
                   <td className='px-4 py-3'>
                     {new Date(course.createdAt).toLocaleDateString()}
                   </td>
@@ -44,7 +69,7 @@ const MyCourses = () => {
         </div>
       </div>
     </div>
-  ):<Loading/>
+  ) : <Loading />
 }
 
 export default MyCourses
